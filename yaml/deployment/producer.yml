@@ -1,0 +1,27 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: producer
+  name: producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: producer
+  template:
+    metadata:
+      labels:
+        app: producer
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers:
+      - image: gsengun/rabbitmq-ha-test:0.1.8
+        name: rabbitmq-ha-test
+        command: ["python3", "producer.py"]
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: MESSAGES_IN_A_SECOND
+          value: "10"

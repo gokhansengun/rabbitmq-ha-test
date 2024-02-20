@@ -1,0 +1,59 @@
+---
+replicaCount: 3
+
+service:
+  type: NodePort
+
+  nodePorts:
+    amqp: 30000
+    manager: 30080
+
+persistence:
+  storageClass: "nfs-client-async"
+
+extraSecrets:
+  load-definition:
+    load_definition.json: |
+      {
+        "vhosts": [
+          {
+            "name": "/"
+          }
+        ],
+        "policies": [
+          {
+            "name": "ha-all",
+            "pattern": ".*",
+            "vhost": "/",
+            "definition": {
+              "ha-mode": "exactly",
+              "ha-params": 2,
+              "ha-sync-mode": "automatic",
+              "ha-promote-on-failure": "when-synced"
+            }
+          }
+        ],
+        "users":[
+          {
+            "name": "rabbitmq",
+            "password": "rabbitmq",
+            "tags": "management,policymaker,monitoring,administrator"
+          }
+        ],
+        "permissions": [
+          {
+            "user": "rabbitmq",
+            "vhost": "/",
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*"
+          }
+        ]
+      }
+
+loadDefinition:
+  enabled: true
+  existingSecret: load-definition
+
+extraConfiguration: |-
+  load_definitions = /app/load_definition.json
